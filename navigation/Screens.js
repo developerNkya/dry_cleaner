@@ -19,6 +19,7 @@ import SettingsScreen from '../screens/Settings';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
+import LoginPage from '../screens/LoginPage';
 
 const { width } = Dimensions.get('screen');
 
@@ -238,6 +239,16 @@ export default function OnboardingStack(props) {
         headerShown: false,
       }}
     >
+
+      <Stack.Screen
+        name="LoginPage"
+        component={LoginPage}
+        option={{
+          headerTransparent: true,
+        }}
+      />
+
+
       <Stack.Screen
         name="Onboarding"
         component={Onboarding}
@@ -245,6 +256,9 @@ export default function OnboardingStack(props) {
           headerTransparent: true,
         }}
       />
+
+  
+
       <Stack.Screen name="App" component={AppStack} />
     </Stack.Navigator>
   );
