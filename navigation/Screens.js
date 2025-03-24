@@ -20,6 +20,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginPage from '../screens/LoginPage';
+import Dashboard from '../screens/Dashboard';
 
 const { width } = Dimensions.get('screen');
 
@@ -243,6 +244,14 @@ export default function OnboardingStack(props) {
       <Stack.Screen
         name="LoginPage"
         component={LoginPage}
+        option={{
+          headerTransparent: true,
+        }}
+      />
+ 
+      <Stack.Screen
+        name="Dashboard"
+        component={Dashboard}
         option={{
           headerTransparent: true,
         }}

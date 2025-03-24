@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Replace with your API endpoint
-const LOGIN_API_URL = 'https://salty-dancers-spend.loca.lt/users/login';
+const LOGIN_API_URL = 'http://10.0.2.2:3000/users/login';
 
 /**
  * Function to handle login request
@@ -16,6 +16,6 @@ export const loginUser = async (username, password) => {
     const statusCode = response.data.status;   
     return statusCode; // Return the API response
   } catch (error) {
-    throw error; // If error occurs, throw it to be handled by the caller
+    throw error;
   }
 };
