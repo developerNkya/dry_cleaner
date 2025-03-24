@@ -193,6 +193,14 @@ function AppStack(props) {
       }}
       initialRouteName="Home"
     >
+      <Stack.Screen
+        name="Dashboard"
+        component={Dashboard}
+        option={{
+          headerTransparent: true,
+        }}
+      />
+
       <Drawer.Screen
         name="Home"
         component={HomeStack}
@@ -248,15 +256,6 @@ export default function OnboardingStack(props) {
           headerTransparent: true,
         }}
       />
- 
-      <Stack.Screen
-        name="Dashboard"
-        component={Dashboard}
-        option={{
-          headerTransparent: true,
-        }}
-      />
-
 
       <Stack.Screen
         name="Onboarding"

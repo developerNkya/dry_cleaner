@@ -35,7 +35,7 @@ const LoginPage = () => {
       console.log('2');
       
       if (response === 200) {
-        navigation.navigate('App', { screen: 'Home' });
+        navigation.navigate('App', { screen: 'Dashboard' });
         Alert.alert('Error', 'Login Successfully');
       } else {
         // If login failed, show an error message
