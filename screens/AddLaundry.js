@@ -20,49 +20,62 @@ class AddLaundry extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      laundryItems: [
-        { id: 1, name: 'Shirt', price: 5 },
-        { id: 2, name: 'Jeans', price: 10 },
-        { id: 3, name: 'Jacket', price: 15 }
-      ],
+      laundryItems: [], // Initially empty
       showForm: false,
       name: '',
       price: ''
     };
   }
 
-  toggleForm = () => {
-    this.setState({ showForm: !this.state.showForm });
-  };
+  componentDidMount() {
+    this.fetchLaundryItems(1);
+  }
+  
 
+  fetchLaundryItems = async (nextPage = 1) => {
+    try {
+      console.log('Fetching page:', nextPage);
+  
+      const response = await fetch(`http://10.0.2.2:3000/laundry?page=${nextPage}`);
+      const data = await response.json();
+
+      console.log(data);
+      
+  
+      this.setState((prevState) => ({
+        laundryItems: data.data,
+        total: data.total,
+        page: nextPage,
+        pageCount: data.pageCount
+      }));
+    } catch (error) {
+      console.error('Error fetching laundry items:', error);
+      Alert.alert('Error', 'Failed to fetch laundry items.');
+    }
+  };
+  
+  
 
   
   addLaundryItem = async () => {
-    const { name, price, laundryItems } = this.state;
-  
+    const { name, price } = this.state;
+
     if (!name || !price) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
-  
-    // Ensure price is only digits
+
     if (!/^\d+(\.\d{1,2})?$/.test(price)) {
       Alert.alert('Error', 'Price must be a valid number.');
       return;
     }
-  
+
     try {
-      // Call addLaundry from laundryService.js
       const response = await addLaundry(name, parseFloat(price));
-  
+
       if (response.status === 201) {
-        // Update local state after success
-        this.setState({
-          laundryItems: [...laundryItems, { id: laundryItems.length + 1, name, price }],
-          showForm: false,
-          name: '',
-          price: '',
-        });
+        this.setState({ showForm: false, name: '', price: '' });
+        this.fetchLaundryItems(); // Refresh laundry list
         Alert.alert('Success', 'Laundry item added successfully.');
       } else {
         Alert.alert('Error', 'Failed to add laundry item.');
@@ -72,9 +85,16 @@ class AddLaundry extends React.Component {
       Alert.alert('Error', 'An error occurred. Please try again.');
     }
   };
-  
+
+
+  toggleForm = () => {
+    this.setState({ showForm: !this.state.showForm });
+  };
+
+
   
 
+  
   renderTable = () => {
     return (
       <Block flex style={styles.group}>
@@ -87,7 +107,7 @@ class AddLaundry extends React.Component {
             <DataTable.Title numeric>Price ($)</DataTable.Title>
             <DataTable.Title numeric>Edit</DataTable.Title>
           </DataTable.Header>
-
+  
           {this.state.laundryItems.map((item) => (
             <DataTable.Row key={item.id}>
               <DataTable.Cell>{item.name}</DataTable.Cell>
@@ -100,9 +120,39 @@ class AddLaundry extends React.Component {
             </DataTable.Row>
           ))}
         </DataTable>
+  
+        <Block row style={{ marginTop: 10, justifyContent: 'space-between', width: '100%' }}>
+  {/* Previous Button */}
+  {this.state.page > 1 && (
+    <Button
+      textStyle={{ fontSize: 12 }}
+      color="gray"
+      style={[styles.button, { flex: 1, marginRight: 10 }]} // Ensures even spacing
+      onPress={() => this.fetchLaundryItems(this.state.page - 1)}
+    >
+      Previous
+    </Button>
+  )}
+
+  {/* Next Button */}
+  {this.state.page < this.state.pageCount && (
+    <Button
+      textStyle={{ fontSize: 12 }}
+      color="black"
+      style={[styles.button, { flex: 1, marginLeft: 10 }]} // Ensures even spacing
+      onPress={() => this.fetchLaundryItems(this.state.page + 1)}
+    >
+      Next
+    </Button>
+  )}
+</Block>
+
+
+
       </Block>
     );
   };
+  
 
   renderForm = () => {
     return (

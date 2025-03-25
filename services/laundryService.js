@@ -11,14 +11,7 @@ const ADD_LAUNDRY_API_URL = 'http://10.0.2.2:3000/laundry/create';
  */
 export const addLaundry = async (name, price) => {
   try {
-    console.log('====================================');
-    console.log('starteds');
-    console.log('====================================');
-    const response = await axios.post(ADD_LAUNDRY_API_URL, { name, price });
-    console.log('the response');
-    console.log(response.data);
-    
-    
+    const response = await axios.post(ADD_LAUNDRY_API_URL, { name, price }); 
     return response;
   } catch (error) {
     throw error;

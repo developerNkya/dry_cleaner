@@ -8,7 +8,7 @@ export default [
   },
   {
     title: 'Many limitations on what’s right',
-    image: require("../assets/imgs/bg40.jpg"),
+    image: require("../assets/imgs/add_laundry.jpg"),
     cta: 'Add Laundry'
   },
   {
