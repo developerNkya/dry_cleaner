@@ -16,6 +16,7 @@ class Dashboard extends React.Component {
         <Block flex>
           <Block flex row>
             <Card
+              route= 'AddLaundry'
               item={articles[1]}
               style={{ marginRight: theme.SIZES.BASE }}
             />

@@ -21,6 +21,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginPage from '../screens/LoginPage';
 import Dashboard from '../screens/Dashboard';
+import AddLaundry from '../screens/AddLaundry';
 
 const { width } = Dimensions.get('screen');
 
@@ -200,6 +201,15 @@ function AppStack(props) {
           headerTransparent: true,
         }}
       />
+
+      <Stack.Screen
+        name="AddLaundry"
+        component={AddLaundry}
+        option={{
+          headerTransparent: true,
+        }}
+      />
+
 
       <Drawer.Screen
         name="Home"

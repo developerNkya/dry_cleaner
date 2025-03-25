@@ -17,7 +17,8 @@ class Card extends React.Component {
       ctaColor,
       imageStyle,
       ctaRight,
-      titleStyle
+      titleStyle,
+      route // Accept route as a prop
     } = this.props;
 
     const imageStyles = [full ? styles.fullImage : styles.horizontalImage, imageStyle];
@@ -31,14 +32,14 @@ class Card extends React.Component {
 
     return (
       <Block row={horizontal} card flex style={cardContainer}>
-        <TouchableWithoutFeedback onPress={() => navigation.navigate('Pro')}>
+        <TouchableWithoutFeedback onPress={() => navigation.navigate(route || 'Pro')}>
           <Block flex style={imgContainer}>
             <Image resizeMode="cover" source={item.image} style={imageStyles} />
           </Block>
         </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback onPress={() => navigation.navigate('Pro')}>
+        <TouchableWithoutFeedback onPress={() => navigation.navigate(route || 'Pro')}>
           <Block flex space="between" style={styles.cardDescription}>
-            <Block flex>
+            {/* <Block flex>
               <Text
                 style={{ fontFamily: 'montserrat-regular' }}
                 size={14}
@@ -57,9 +58,7 @@ class Card extends React.Component {
                     {item.subtitle}
                   </Text>
                 </Block>
-              ) : (
-                  <Block />
-                )}
+              ) : <Block />}
               {item.description ? (
                 <Block flex center>
                   <Text
@@ -70,9 +69,7 @@ class Card extends React.Component {
                     {item.description}
                   </Text>
                 </Block>
-              ) : (
-                  <Block />
-                )}
+              ) : <Block />}
               {item.body ? (
                 <Block flex left>
                   <Text
@@ -83,10 +80,8 @@ class Card extends React.Component {
                     {item.body}
                   </Text>
                 </Block>
-              ) : (
-                  <Block />
-                )}
-            </Block>
+              ) : <Block />}
+            </Block> */}
             <Block right={ctaRight ? true : false}>
               <Text
                 style={styles.articleButton}
@@ -113,8 +108,10 @@ Card.propTypes = {
   imageStyle: PropTypes.any,
   ctaRight: PropTypes.bool,
   titleStyle: PropTypes.any,
-  textBodyStyle: PropTypes.any
+  textBodyStyle: PropTypes.any,
+  route: PropTypes.string // Add route as an optional prop
 };
+
 
 const styles = StyleSheet.create({
   card: {
@@ -164,8 +161,8 @@ const styles = StyleSheet.create({
   },
   articleButton: {
     fontFamily: 'montserrat-bold',
-    paddingHorizontal: 9,
-    paddingVertical: 7
+    paddingHorizontal: 0,
+    paddingVertical: 5
   }
 });
 

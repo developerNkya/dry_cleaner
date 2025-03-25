@@ -1,3 +1,4 @@
+
 export default [
   {
     title: 'Society has put up so many boundaries',
@@ -8,7 +9,7 @@ export default [
   {
     title: 'Many limitations on what’s right',
     image: require("../assets/imgs/bg40.jpg"),
-    cta: 'View article'
+    cta: 'Add Laundry'
   },
   {
     title: 'Why would anyone pick blue over?',
