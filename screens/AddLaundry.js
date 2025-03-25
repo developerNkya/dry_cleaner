@@ -10,9 +10,8 @@ import { Block, Text, Button, theme } from 'galio-framework';
 import { Input, Icon } from '../components';
 import { DataTable } from 'react-native-paper';
 import { FontAwesome } from '@expo/vector-icons'; 
-import { addLaundry } from '../services/laundryService';
+import { addLaundry, updateLaundry } from '../services/laundryService';
 import { Alert } from 'react-native';
-
 
 const { width } = Dimensions.get('screen');
 
@@ -23,25 +22,43 @@ class AddLaundry extends React.Component {
       laundryItems: [], // Initially empty
       showForm: false,
       name: '',
-      price: ''
+      price: '',
+      editingItemId: null,
     };
   }
+
+  // This function toggles between Add and Edit mode
+  toggleForm = () => {
+    if (this.state.showForm) {
+      // If closing the form, reset the state for a new addition
+      this.setState({ showForm: false, name: '', price: '', editingItemId: null });
+    } else {
+      // Opening form for Add mode, reset fields to empty
+      this.setState({ showForm: true, name: '', price: '', editingItemId: null });
+    }
+  };
+
+  // Starts editing the item, populating the form with the selected item details
+  startEditing = (item) => {
+    this.setState({
+      showForm: true, // Show the form
+      name: item.name, // Set the name to be edited
+      price: item.price.toString(), // Set the price to be edited
+      editingItemId: item.id, // Set the ID of the item being edited
+    });
+  };
 
   componentDidMount() {
     this.fetchLaundryItems(1);
   }
-  
 
   fetchLaundryItems = async (nextPage = 1) => {
     try {
       console.log('Fetching page:', nextPage);
-  
       const response = await fetch(`http://10.0.2.2:3000/laundry?page=${nextPage}`);
       const data = await response.json();
-
       console.log(data);
-      
-  
+
       this.setState((prevState) => ({
         laundryItems: data.data,
         total: data.total,
@@ -53,12 +70,9 @@ class AddLaundry extends React.Component {
       Alert.alert('Error', 'Failed to fetch laundry items.');
     }
   };
-  
-  
 
-  
   addLaundryItem = async () => {
-    const { name, price } = this.state;
+    const { name, price, editingItemId } = this.state;
 
     if (!name || !price) {
       Alert.alert('Error', 'Please fill in all fields.');
@@ -71,14 +85,31 @@ class AddLaundry extends React.Component {
     }
 
     try {
-      const response = await addLaundry(name, parseFloat(price));
+      let response;
+      if (editingItemId) {
+        // Update existing item
+        // response = await fetch(`http://10.0.2.2:3000/laundry/${editingItemId}`, {
+        //   method: 'PUT',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ name, price: parseFloat(price) }),
+        // });
 
-      if (response.status === 201) {
-        this.setState({ showForm: false, name: '', price: '' });
-        this.fetchLaundryItems(); // Refresh laundry list
-        Alert.alert('Success', 'Laundry item added successfully.');
+        response = await updateLaundry(name, parseFloat(price),editingItemId);
       } else {
-        Alert.alert('Error', 'Failed to add laundry item.');
+        // Add new item
+         response = await addLaundry(name, parseFloat(price));
+      }
+
+      console.log('====================================');
+      console.log(response.data);
+      console.log('====================================');
+            
+      if (response.data.success) {
+        this.setState({ showForm: false, name: '', price: '', editingItemId: null });
+        this.fetchLaundryItems(); // Refresh the list
+        Alert.alert('Success', editingItemId ? 'Laundry item updated successfully.' : 'Laundry item added successfully.');
+      } else {
+        Alert.alert('Error', 'Failed to save laundry item.');
       }
     } catch (error) {
       console.error(error);
@@ -86,21 +117,10 @@ class AddLaundry extends React.Component {
     }
   };
 
-
-  toggleForm = () => {
-    this.setState({ showForm: !this.state.showForm });
-  };
-
-
-  
-
-  
   renderTable = () => {
     return (
       <Block flex style={styles.group}>
-        <Text size={16} style={styles.title}>
-          Laundry List
-        </Text>
+        <Text size={16} style={styles.title}>Laundry List</Text>
         <DataTable style={styles.table}>
           <DataTable.Header style={styles.tableHeader}>
             <DataTable.Title>Name</DataTable.Title>
@@ -113,7 +133,7 @@ class AddLaundry extends React.Component {
               <DataTable.Cell>{item.name}</DataTable.Cell>
               <DataTable.Cell numeric>${item.price}</DataTable.Cell>
               <DataTable.Cell numeric>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => this.startEditing(item)}>
                   <Icon name="edit" family="FontAwesome" size={16} color="black" />
                 </TouchableOpacity>
               </DataTable.Cell>
@@ -122,33 +142,30 @@ class AddLaundry extends React.Component {
         </DataTable>
   
         <Block row style={{ marginTop: 10, justifyContent: 'space-between', width: '100%' }}>
-  {/* Previous Button */}
-  {this.state.page > 1 && (
-    <Button
-      textStyle={{ fontSize: 12 }}
-      color="gray"
-      style={[styles.button, { flex: 1, marginRight: 10 }]} // Ensures even spacing
-      onPress={() => this.fetchLaundryItems(this.state.page - 1)}
-    >
-      Previous
-    </Button>
-  )}
-
-  {/* Next Button */}
-  {this.state.page < this.state.pageCount && (
-    <Button
-      textStyle={{ fontSize: 12 }}
-      color="black"
-      style={[styles.button, { flex: 1, marginLeft: 10 }]} // Ensures even spacing
-      onPress={() => this.fetchLaundryItems(this.state.page + 1)}
-    >
-      Next
-    </Button>
-  )}
-</Block>
-
-
-
+          {/* Previous Button */}
+          {this.state.page > 1 && (
+            <Button
+              textStyle={{ fontSize: 12 }}
+              color="gray"
+              style={[styles.button, { flex: 1, marginRight: 10 }]} // Ensures even spacing
+              onPress={() => this.fetchLaundryItems(this.state.page - 1)}
+            >
+              Previous
+            </Button>
+          )}
+  
+          {/* Next Button */}
+          {this.state.page < this.state.pageCount && (
+            <Button
+              textStyle={{ fontSize: 12 }}
+              color="black"
+              style={[styles.button, { flex: 1, marginLeft: 10 }]} // Ensures even spacing
+              onPress={() => this.fetchLaundryItems(this.state.page + 1)}
+            >
+              Next
+            </Button>
+          )}
+        </Block>
       </Block>
     );
   };
@@ -158,32 +175,34 @@ class AddLaundry extends React.Component {
     return (
       <Block flex style={styles.group}>
         <Text size={16} style={styles.title}>
-          Add Laundry
+          {this.state.editingItemId ? 'Edit Laundry Item' : 'Add Laundry Item'}
         </Text>
-         <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
-                  <Input
-                    primary={this.state.primaryFocus}
-                    right
-                    placeholder="Name"
-                    onFocus = {() => this.setState({primaryFocus: true})}
-                    onBlur = {() => this.setState({primaryFocus: false})}
-                    onChangeText={(text) => this.setState({ name: text })}
-                    iconContent={<Block />}
-                    shadowless
-                  />
-          </Block>
-          <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
-                  <Input
-                    primary={this.state.primaryFocus}
-                    right
-                    placeholder="Price"
-                    onFocus = {() => this.setState({primaryFocus: true})}
-                    onBlur = {() => this.setState({primaryFocus: false})}
-                    onChangeText={(text) => this.setState({ price: text })}
-                    iconContent={<Block />}
-                    shadowless
-                  />
-          </Block>
+        <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
+          <Input
+            primary={this.state.primaryFocus}
+            right
+            placeholder="Name"
+            value={this.state.name} // Pre-fill the name or empty string
+            onFocus={() => this.setState({ primaryFocus: true })}
+            onBlur={() => this.setState({ primaryFocus: false })}
+            onChangeText={(text) => this.setState({ name: text })}
+            iconContent={<Block />}
+            shadowless
+          />
+        </Block>
+        <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
+          <Input
+            primary={this.state.primaryFocus}
+            right
+            placeholder="Price"
+            value={this.state.price} // Pre-fill the price or empty string
+            onFocus={() => this.setState({ primaryFocus: true })}
+            onBlur={() => this.setState({ primaryFocus: false })}
+            onChangeText={(text) => this.setState({ price: text })}
+            iconContent={<Block />}
+            shadowless
+          />
+        </Block>
         <Block center>
           <Button
             textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
@@ -191,7 +210,7 @@ class AddLaundry extends React.Component {
             style={styles.button}
             onPress={this.addLaundryItem}
           >
-            ADD LAUNDRY
+            {this.state.editingItemId ? 'UPDATE LAUNDRY' : 'ADD LAUNDRY'}
           </Button>
         </Block>
       </Block>
@@ -201,15 +220,11 @@ class AddLaundry extends React.Component {
   render() {
     return (
       <Block flex center>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 30, width }}
-        >
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30, width }}>
           {this.state.showForm ? this.renderForm() : this.renderTable()}
         </ScrollView>
         <TouchableOpacity style={styles.floatingButton} onPress={this.toggleForm}>
-        <FontAwesome name={this.state.showForm ? 'arrow-left' : 'plus'} size={20} color="white" />
-
+          <FontAwesome name={this.state.showForm ? 'arrow-left' : 'plus'} size={20} color="white" />
         </TouchableOpacity>
       </Block>
     );
@@ -224,9 +239,7 @@ const styles = StyleSheet.create({
     marginTop: 44,
     color: 'black'
   },
-  group: {
-    // paddingTop: theme.SIZES.BASE
-  },
+  group: {},
   button: {
     marginBottom: theme.SIZES.BASE,
     width: width - theme.SIZES.BASE * 2
